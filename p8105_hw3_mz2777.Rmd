@@ -12,13 +12,14 @@ knitr::opts_chunk$set(
   fig.asp = .6
   )
 library(tidyverse)
+library(viridis)
 ```
 
 # Problem 1
 
 ### Description of the datase
 
-```{r}
+```{r }
 #load dataset
 library(p8105.datasets)
 data("instacart")
@@ -58,12 +59,13 @@ instacart %>%
   summarize(n_obs = n()) %>% 
   filter(n_obs > 10000) %>% 
   ggplot(aes(x = aisle, y = sort(n_obs))) + 
-  geom_point() + 
+  geom_point(size = 2) + 
   labs(
     title = "The Number of Items Ordered in each Aisle",
     x = "Aisle Name",
     y = "The number of items"
   ) + 
+  theme_bw() + 
   theme(axis.text.x = element_text(size = 9, vjust = 0.5, hjust = 0.5, angle = 45))
 ```
 
@@ -100,8 +102,135 @@ knitr::kable(mean_hod_dow, digits = 3)
 
 # Problem 2
 
-# Problem 3
+### Import data
+```{r, include=FALSE}
+data("brfss_smart2010")
+force(brfss_smart2010)
+```
 
+First, do some data cleaning:
+
+* format the data to use appropriate variable names;
+* focus on the “Overall Health” topic
+* include only responses from “Excellent” to “Poor”
+* organize responses as a factor taking levels ordered from “Poor” to “Excellent”
+
+```{r clean data}
+#clean data
+brfss = brfss_smart2010 %>% 
+  janitor::clean_names() %>%
+  filter(topic == "Overall Health", 
+         response == "Excellent" | 
+           response == "Very good" | 
+           response == "Good" | 
+           response == "Fair" | 
+           response == "Poor") %>% 
+  mutate(
+    response = factor(
+      response, 
+      levels = c("Poor", "Fair", "Good", "Very good", "Excellent")
+      )
+    )
+```
+
+Using this dataset, do or answer the following (commenting on the results of each):
+
+* In 2002, which states were observed at 7 or more locations? What about in 2010?
+
+In 2002 we can see there are 6 states were observed at 7 or more locations shown as table 1, and in 2010, there are 14 states were observed at 7 or more locations shown as table 2. 
+
+**Comment:** the increasing number of observed locations shows that BRFSS has become a powerful tool for targeting and building health promotion activities. The benefits of this system have been brought to society, like addressing urgent and emerging health issue.
+
+```{r popularity}
+# in 2002
+knitr::kable(
+    brfss %>% 
+      filter(year == 2002) %>% 
+      group_by(locationabbr) %>% 
+      distinct(locationdesc) %>% 
+      count() %>% 
+      filter(n >= 7),
+    caption = "Table 1: In 2002, 6 states were observed at 7 or more locations"
+  )
+
+#in 2010
+knitr::kable(
+    brfss %>% 
+      filter(year == 2010) %>% 
+      group_by(locationabbr) %>% 
+      distinct(locationdesc) %>% 
+      count() %>% 
+      filter(n >= 7),
+    caption = "Table 2: In 2010, 14 states were observed at 7 or more locations"
+  )
+```
+
+
+* Construct a dataset that is limited to Excellent responses, and contains, year, state, and a variable that averages the data_value across locations within a state. Make a “spaghetti” plot of this average value over time within a state (that is, make a plot showing a line for each state across years – the geom_line geometry and group aesthetic will help).
+
+**Comment:** 
+
+```{r Construct a dataset and Make a “spaghetti” plot}
+# construct the dataset
+mean_data_value = brfss %>% 
+  filter(response == "Excellent") %>% 
+  group_by(year, locationabbr) %>% 
+  summarize(mean_data_value = mean(data_value, na.rm = TRUE)) %>% 
+  rename(state = locationabbr) # change variable name
+
+#knitr::kable(mean_data_value)
+
+# “spaghetti” plot
+mean_data_value %>% 
+  ggplot(aes(x = year, y = mean_data_value)) +
+  geom_line(aes(color = state)) + 
+  scale_color_viridis(discrete=TRUE) + 
+  labs(
+    title = "Mean data value over time within a state",
+    y = "Mean Data Value"
+  ) + 
+  theme_bw()
+```
+
+* Make a two-panel plot showing, for the years 2006, and 2010, distribution of data_value for responses (“Poor” to “Excellent”) among locations in NY State.
+
+**Comment:**
+
+```{r distribution of data_value}
+brfss%>% 
+  filter(year == 2006 | year == 2010, 
+         locationabbr == "NY") %>% 
+  select(year, locationdesc, response, data_value) %>% 
+  mutate(locationdesc = forcats::fct_reorder(locationdesc, year, median)) %>%
+  ggplot(aes(x = response, y = data_value)) + 
+  geom_point() + 
+  facet_grid(year ~ locationdesc)
+  
+brfss%>% 
+  filter(year == 2006 | year == 2010, 
+         locationabbr == "NY") %>% 
+  select(year, locationdesc, response, data_value) %>% 
+  ggplot(aes(x = response, y = data_value)) + 
+  geom_point(aes(color = locationdesc), size = 8, alpha=.6) + 
+  facet_grid(.~year) + 
+  scale_color_viridis(name = "Locations in NY state", discrete=TRUE)
+
+```
+
+# Problem 3
+* Load, tidy, and otherwise wrangle the data. Your final dataset should include all originally observed variables and values; have useful variable names; include a weekday vs weekend variable; and encode data with reasonable variable classes. Describe the resulting dataset (e.g. what variables exist, how many observations, etc).
+
+```{r }
+accel_data = read_csv("data/accel_data.csv") %>% 
+  janitor::clean_names() %>% 
+  
+
+```
+
+
+* Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate accross minutes to create a total activity variable for each day, and create a table showing these totals. Are any trends apparent?
+
+* Accelerometer data allows the inspection activity over the course of the day. Make a single-panel plot that shows the 24-hour activity time courses for each day and use color to indicate day of the week. Describe in words any patterns or conclusions you can make based on this grap
 
 
 
