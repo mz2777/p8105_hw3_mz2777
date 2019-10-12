@@ -38,16 +38,18 @@ The size of the data is `r nrow(instacart)` observations of `r ncol(instacart)` 
 There are 134 aisles and "fresh vegetables" is the most items ordered from, and the number of order is 150609.
 ```{r}
 #the number of aisles
-knitr::kable(instacart %>%
+instacart %>%
   summarize(
   n_aisles = n_distinct(aisle)
-  ))
+  ) %>% 
+  knitr::kable()
 
 #aisles that the most items ordered from
-knitr::kable(instacart %>%
+instacart %>%
   group_by(aisle) %>%
   summarize(n_obs = n()) %>% 
-  filter(min_rank(desc(n_obs)) == 1))
+  filter(min_rank(desc(n_obs)) == 1) %>% 
+  knitr::kable()
 ```
 
 * Make a plot that shows the number of items ordered in each aisle, limiting this to aisles with more than 10000 items ordered. Arrange aisles sensibly, and organize your plot so others can read it.
@@ -123,7 +125,7 @@ First, do some data cleaning:
 * include only responses from “Excellent” to “Poor”
 * organize responses as a factor taking levels ordered from “Poor” to “Excellent”
 
-```{r clean data}
+```{r clean brfss data}
 #clean data
 brfss = brfss_smart2010 %>% 
   janitor::clean_names() %>%
@@ -142,24 +144,20 @@ In 2002 we can see there are 6 states were observed at 7 or more locations shown
 
 ```{r popularity}
 # in 2002
-knitr::kable(
-    brfss %>% 
-      filter(year == 2002) %>% 
-      group_by(locationabbr) %>% 
-      summarise(n_location = n_distinct(locationdesc)) %>% 
-      filter(n_location >= 7),
-    caption = "Table 1: In 2002, 6 states were observed at 7 or more locations"
-  )
+brfss %>%
+  filter(year == 2002) %>%
+  group_by(locationabbr) %>%
+  summarise(n_location = n_distinct(locationdesc)) %>%
+  filter(n_location >= 7) %>% 
+  knitr::kable(caption = "Table 1: In 2002, 6 states were observed at 7 or more locations")
 
 #in 2010
-knitr::kable(
-    brfss %>% 
-      filter(year == 2010) %>% 
-      group_by(locationabbr) %>% 
-      summarise(n_location = n_distinct(locationdesc)) %>% 
-      filter(n_location >= 7),
-    caption = "Table 2: In 2010, 14 states were observed at 7 or more locations"
-  )
+brfss %>%
+  filter(year == 2010) %>%
+  group_by(locationabbr) %>%
+  summarise(n_location = n_distinct(locationdesc)) %>%
+  filter(n_location >= 7) %>% 
+  knitr::kable(caption ="Table 2: In 2010, 14 states were observed at 7 or more locations")
 ```
 
 
@@ -208,7 +206,7 @@ brfss%>%
 # Problem 3
 * Load, tidy, and otherwise wrangle the data. Your final dataset should include all originally observed variables and values; have useful variable names; include a weekday vs weekend variable; and **encode data with reasonable variable classes**. Describe the resulting dataset (e.g. what variables exist, how many observations, etc).
 
-```{r }
+```{r clean data}
 accel_data = read_csv("data/accel_data.csv") %>% 
   janitor::clean_names() %>% 
   mutate(day_index = recode(day, 
@@ -235,9 +233,9 @@ accel_data = read_csv("data/accel_data.csv") %>%
 
 * Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate accross minutes to create a total activity variable for each day, and create a table showing these totals. Are any trends apparent?
 
-**Comment:** There is no trend apparently based on the plot. On Thursday, the total activity counts decresed.
+**Comment:** There is no trend apparently based on the plot. The total activity counts is relatively high in week 2 and 3,  In week 4, the total activity counts decresed.
 
-```{r}
+```{r total activity for each day}
 total_accel_data = accel_data %>% 
   group_by(week, day) %>% 
   summarise(sum_activity=sum(activity_counts)) %>% 
@@ -262,7 +260,7 @@ total_accel_data %>%
 
 **Conclusion**: On Wednesday and Tuesday, this patient's activity counts are lower relatively which may show that he did not do much activity on those two days, while on weekend, the activity counts is relatively high. In each day, we can see that this patients usually sleep after midnight and the sleeping time is about 5 hours which is very short. On Friday, he usually have high activity counts around 20:00 to 21:00. On weekends, the activity counts is high during 10:00 to 12:00.
 
-```{r}
+```{r 24-hour activity time courses for each day}
 accel_data %>% 
   ggplot(aes(x= as.numeric(minutes), y = activity_counts, fill = day)) + 
   geom_line(aes(color = day)) +
