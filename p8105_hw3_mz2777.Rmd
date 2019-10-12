@@ -77,7 +77,7 @@ instacart %>%
 
 ```{r table showing the three most popular items in each of the aisles}
 three_pop_item = instacart %>%
-  filter(aisle == "baking ingredients" | aisle == "dog food care" | aisle == "packaged vegetables fruits") %>% 
+  filter(aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits")) %>% 
   group_by(aisle, product_name) %>%
   summarize(n_obs = n()) %>% 
   ungroup() %>% 
@@ -165,7 +165,7 @@ knitr::kable(
 
 * Construct a dataset that is limited to Excellent responses, and contains, year, state, and a variable that averages the data_value across locations within a state. Make a “spaghetti” plot of this average value over time within a state (that is, make a plot showing a line for each state across years – the geom_line geometry and group aesthetic will help).
 
-**Comment:** the mean data value in different states mostly distribute between 15-30 from 2002 to 2010. The mean data value of state WV is lower than 15 in 2005 and 2009. The mean data value of state IN is lower than 15 in 2007.
+**Comment:** the mean data value in different states are mostly distributed between 15-30 from 2002 to 2010. The mean data value of state WV is lower than 15 in 2005 and 2009. The mean data value of state IN is lower than 15 in 2007.
 
 ```{r Construct a dataset and Make a “spaghetti” plot}
 # construct the dataset
@@ -219,17 +219,10 @@ accel_data = read_csv("data/accel_data.csv") %>%
                             "Friday" = "Weekday", 
                             "Saturday" = "Weekend", 
                             "Sunday" = "Weekend"),
-         day_encoded = recode(day, 
-                              "Monday" = 1, 
-                              "Tuesday" = 2, 
-                              "Wednesday" = 3, 
-                              "Thursday" = 4, 
-                              "Friday" = 5, 
-                              "Saturday" = 6, 
-                              "Sunday" = 7),
+         day = forcats::fct_relevel(day, c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")),
          week = factor(week)
          ) %>% 
-  arrange(week, day_encoded) %>% 
+  arrange(week, day) %>% 
   pivot_longer(
     activity_1:activity_1440,
     names_prefix = "activity_",
@@ -238,22 +231,29 @@ accel_data = read_csv("data/accel_data.csv") %>%
   
 ```
 
-**Description:** the size of resulting dataset is `r nrow(accel_data)` observations of `r ncol(accel_data)` variables which are `r names(accel_data[,1])`, `r names(accel_data[,2:5])` for the information of day, `r names(accel_data[,6])` for every minute in each day and `r names(accel_data[,7])`.
+**Description:** the size of resulting dataset is `r nrow(accel_data)` observations of `r ncol(accel_data)` variables which are `r names(accel_data[,1])`, `r names(accel_data[,2:4])` for the information of day, `r names(accel_data[,5])` for every minute in each day and `r names(accel_data[,6])`.
 
 * Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate accross minutes to create a total activity variable for each day, and create a table showing these totals. Are any trends apparent?
 
-There is no trend apparently based on the line plot. On Tuesday, Wednesday and Thursday, the variaty of activity counts is smaller than the other days.
+**Comment:** There is no trend apparently based on the plot. On Thursday, the total activity counts decresed.
 
 ```{r}
 total_accel_data = accel_data %>% 
-  group_by(week, day_encoded) %>% 
+  group_by(week, day) %>% 
   summarise(sum_activity=sum(activity_counts)) %>% 
-  arrange(week, day_encoded)
+  arrange(week, day)
 
 total_accel_data %>% 
-  ggplot(aes(x= day_encoded, y = sum_activity, fill = week)) + 
-  geom_line(aes(color = week), size = 2) + 
-  scale_color_viridis(discrete=TRUE) + 
+  pivot_wider(
+    names_from = day,
+    values_from = sum_activity
+  ) %>% 
+  knitr::kable()
+
+total_accel_data %>% 
+  ggplot(aes(x= week, y = sum_activity, fill = day, width = .5)) + 
+  geom_bar(stat = "identity", size = .3, alpha = .8) + 
+  scale_fill_brewer(palette = "RdBu") + 
   theme_bw()
 ```
 
@@ -270,7 +270,8 @@ accel_data %>%
     x = "minutes",
     y = "activity counts"
   ) + 
-  scale_color_viridis(option = "magma", discrete=TRUE)
+  scale_color_viridis(option = "magma", name = "Day", discrete=TRUE) + 
+  theme_bw()
 
 ```
 
