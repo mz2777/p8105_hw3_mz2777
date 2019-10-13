@@ -218,7 +218,8 @@ accel_data = read_csv("data/accel_data.csv") %>%
                             "Saturday" = "Weekend", 
                             "Sunday" = "Weekend"),
          day = forcats::fct_relevel(day, c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")),
-         week = factor(week)
+         week = factor(week),
+         day_id = factor(day_id)
          ) %>% 
   arrange(week, day) %>% 
   pivot_longer(
@@ -258,17 +259,17 @@ total_accel_data %>%
 
 * Accelerometer data allows the inspection activity over the course of the day. Make a single-panel plot that shows the 24-hour activity time courses for each day and use color to indicate day of the week. Describe in words any patterns or conclusions you can make based on this graph
 
-**Conclusion**: On Wednesday and Tuesday, this patient's activity counts are lower relatively which may show that he did not do much activity on those two days, while on weekend, the activity counts is relatively high. In each day, we can see that this patients usually sleep after midnight and the sleeping time is about 5 hours which is very short. On Friday, he usually have high activity counts around 20:00 to 21:00. On weekends, the activity counts is high during 10:00 to 12:00.
+**Conclusion**: In each day, we can see that this patients usually sleep after midnight and the sleeping time is about 5 hours which is very short. There are two peaks of activity counts which are around 10:00 to 12:00 and 20:00 to 21:00.
 
 ```{r 24-hour activity time courses for each day}
 accel_data %>% 
-  ggplot(aes(x= as.numeric(minutes), y = activity_counts, fill = day)) + 
-  geom_line(aes(color = day)) +
+  ggplot(aes(x= as.numeric(minutes), y = activity_counts, fill = day_id)) + 
+  geom_line(aes(color = day_id)) +
   labs(
     x = "minutes",
     y = "activity counts"
   ) + 
-  scale_color_viridis(option = "magma", name = "Day", discrete=TRUE) + 
+  scale_color_viridis(name = "Day", discrete=TRUE) + 
   theme_bw()
 
 ```
