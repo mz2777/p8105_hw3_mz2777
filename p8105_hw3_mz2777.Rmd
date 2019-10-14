@@ -35,7 +35,7 @@ The size of the data is `r nrow(instacart)` observations of `r ncol(instacart)` 
 ### Answer the questions
 * How many aisles are there, and which aisles are the most items ordered from?
 
-There are 134 aisles and "fresh vegetables" is the most items ordered from, and the number of order is 150609.
+**Comment:**There are 134 aisles and "fresh vegetables" is the most items ordered from, and the number of order is 150609. Fresh vegetables is a strong demand for customers, because most items are ordered from "fresh vegetables" aisle.
 ```{r}
 #the number of aisles
 instacart %>%
@@ -54,7 +54,7 @@ instacart %>%
 
 * Make a plot that shows the number of items ordered in each aisle, limiting this to aisles with more than 10000 items ordered. Arrange aisles sensibly, and organize your plot so others can read it.
 
-
+**Comment:**We can from the plot that the least items are odered from butter aisle, and fresh vegetables and fresh fruits have nearly twice the amount of orders compared to packaged vegetables fruits, which we can conclude that people like fresh foods more.
 ```{r scatterplot for the number of items ordered in each aisle}
 # scatterplot for the number of items ordered in each aisle
 instacart %>%
@@ -77,6 +77,7 @@ instacart %>%
 
 * Make a table showing the three most popular items in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”. Include the number of times each item is ordered in your table.
 
+**Comment:** In baking ingredients aisle, cane sugar, pure baking soda and light brown sugar are the three most items have been odered. Small dog biscuits, organix chicken and brown rice recipe and snack sticks chicken and rice recipe dog treats are the three most items ordered in dog food care aisle. Organic blueberries, organic raspberries and organic baby spinach are the three most items ordered in packaged vegetables fruits.
 ```{r table showing the three most popular items in each of the aisles}
 three_pop_item = instacart %>%
   filter(aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits")) %>% 
@@ -93,6 +94,7 @@ knitr::kable(three_pop_item)
 * Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
 
 Assuming that 0-6 represents Sun-Sat.
+**Comment:**We can see from the table that people more likely to buy coffee ice cream after 12:00am, while the mean hour of the day for pink lady apple is relatively small so people buy pink lady apples at an earlier time of the day.
 
 ```{r table showing the mean hour of the day}
 # table showing the mean hour of the day
